@@ -1,0 +1,119 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>FFXIV Contents Finder Generator</title>
+  <link href="https://fonts.googleapis.com/earlyaccess/sawarabimincho.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.js"></script>
+  <style type="text/css">
+    body {
+      background-color: black;
+      background-color: white;
+    }
+    #svg-template__title,
+    #svg-template__notice {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="vue-root">
+    <input type="text" v-model="content" />
+    <div style="position: relative;">
+      <div is="cf-title" v-bind:text="'コンテンツ開放'"></div>
+    </div>
+    <div style="position: relative;" id="content">
+      <div is="cf-title" v-bind:text="content"></div>
+    </div>
+    <div style="position: relative;">
+      <div is="cf-notice"></div>
+    </div>
+  </div>
+
+  <div id="svg-template__title">
+    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="96px">
+      <foreignObject width="100%" height="100%">
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+          font-size: 76px;
+          font-weight: 900;
+          font-family: 'ヒラギノ明朝 ProN', 'Hiragino Mincho ProN', serif;">
+          <p style="
+            color: #f9960c;
+            color: #fdf9e6;
+            width: 100%;
+            height: 96px;
+            line-height: 96px;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            filter: drop-shadow(0px 0px 1px #cb8402) drop-shadow(-1px -1px 1px #cb8402) drop-shadow(1px 1px 1px #cb8402);
+            text-shadow: 0px 0px 4px #ffffff, 0px 0px 2px #cb8402, 0px 0px 8px #cb8402;">
+            {{ text }}
+          </p>
+        </div>
+      </foreignObject>
+    </svg>
+  </div>
+
+  <div id="svg-template__notice">
+    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="96px">
+      <foreignObject width="100%" height="100%">
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+          font-size: 24px;
+          font-weight: 300;
+          font-family: 'ヒラギノ角ゴ Pro W3', 'HiraKakuPro-W3', sans-serif;">
+          <div style="
+            background-color: rgba(0, 0, 0, 0.8);
+            box-shadow: 0px 0px 8px 6px rgba(255, 255, 255, 1) inset;
+            border-radius: 24px;
+            display: inline-block;
+            height: 58px;
+            line-height: 58px;
+            padding: 0 20px;
+            ">
+            <p style="
+              color: #fdf9e6;
+              width: 100%;
+              display: block;
+              text-align: center;
+              margin: 0 8px;
+              padding: 0;
+              filter: drop-shadow(-1px -1px 1px #cb8402) drop-shadow(1px 1px 1px #cb8402);
+              text-shadow: 0px 0px 2px #ffffff, 0px 0px 4px #cb8402;">
+              {{ text }}
+            </p>
+          </div>
+        </div>
+      </foreignObject>
+    </svg>
+  </div>
+
+  <script type="text/javascript">
+    (function() {
+      Vue.component("cf-title", {
+        template : "#svg-template__title",
+        props: ["text"],
+        data: (function() {
+          return {
+          };
+        }),
+      });
+      Vue.component("cf-notice", {
+        template : "#svg-template__notice",
+        data: (function() {
+          return {
+            text: "新しいコンテンツがコンテンツファインダーに登録されました。",
+          };
+        }),
+      });
+
+      var vm = new Vue({
+        el: "#vue-root",
+        data: {
+          content: "邪教排撃 古城アムダプール",
+        },
+      });
+    })();
+  </script>
+</body>
+</html>
