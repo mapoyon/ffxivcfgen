@@ -55,8 +55,8 @@
     <div class="pure-g">
       <div class="pure-u-12-24">
         <p class="notice">画像を右クリックで保存出来ます。</p>
-        <p class="notice">保存できない場合はこちら→
-          <a id="download" v-on:click="doDownload">ダウロード</a>
+        <p class="notice" v-if="canLinkDownload">保存できない場合はこちら→
+          <button id="download" v-on:click="doDownload">ダウンロード</button>
         </p>
         <p class="notice">推奨ハッシュタグ: </p>
         <p class="notice">#FFXIVCFGEN #FFXIVコンテンツ開放ジェネレーター</p>
@@ -160,6 +160,16 @@
           this.canvas = document.querySelector("#preview");
           this.context = this.canvas.getContext("2d");
         }),
+        computed: {
+          canLinkDownload: (function() {
+            var userAgent = window.navigator.userAgent.toLowerCase();
+            if(userAgent.indexOf("android") != -1) {
+              return true;
+            } else {
+              return false;
+            }
+          }),
+        },
         methods: {
           onChangeImage: (function(e) {
             var file = e.target.files[0];
@@ -187,9 +197,15 @@
           }),
           doDownload: (function() {
             var a = document.createElement("a");
+            var download = document.querySelector("#download");
+
+            download.setAttribute("disabled", "disabled");
+
             a.setAttribute("href", document.querySelector("#preview").toDataURL("image/jpeg"));
             a.setAttribute("download", "download.jpg");
             a.click();
+
+            download.removeAttribute("disabled");
           }),
           clear: (function() {
             this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
