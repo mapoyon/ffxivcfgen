@@ -55,6 +55,9 @@
     <div class="pure-g">
       <div class="pure-u-12-24">
         <p class="notice">画像を右クリックで保存出来ます。</p>
+        <p class="notice">保存できない場合はこちら→
+          <a id="download" v-on:click="doDownload">ダウロード</a>
+        </p>
         <p class="notice">推奨ハッシュタグ: </p>
         <p class="notice">#FFXIVCFGEN #FFXIVコンテンツ開放ジェネレーター</p>
       </div>
@@ -72,7 +75,6 @@
     <div id="cf-notice">
       <div is="cf-notice" v-bind:text="'新しいコンテンツがコンテンツファインダーに登録されました。'"></div>
     </div>
-    <img id="dummy-img" />
   </div>
 
   <div id="svg-template__title">
@@ -183,6 +185,12 @@
           onChangeContent: (function() {
             this.render();
           }),
+          doDownload: (function() {
+            var a = document.createElement("a");
+            a.setAttribute("href", document.querySelector("#preview").toDataURL("image/jpeg"));
+            a.setAttribute("download", "download.jpg");
+            a.click();
+          }),
           clear: (function() {
             this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
           }),
@@ -223,8 +231,7 @@
           renderSvg: (function(data, dx, dy) {
             var image = new Image();
             var svg = new Blob([data], {type: "image/svg+xml;charset=utf-8"});
-            var data = btoa(unescape(encodeURIComponent(data)));
-            var url = "data:image/svg+xml;charset=utf-8;base64," + data;
+            var url = "data:image/svg+xml;charset=utf-8;base64," + btoa(unescape(encodeURIComponent(data)));
 
             image.addEventListener("load", (function() {
               this.context.drawImage(image, dx, dy);
