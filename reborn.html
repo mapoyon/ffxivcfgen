@@ -20,6 +20,9 @@
     .pure-form-aligned .pure-control-group label {
       width: 8em;
     }
+    .pure-form-aligned .pure-controls {
+      margin-left: 9.5em;
+    }
     .notice {
       font-size: 12px;
       margin: 4px 0;
@@ -43,6 +46,11 @@
           <label class="control-label" for="select-image">画像を選択</label>
           <input type="file" class="select-image" id="select-image" v-on:change="onChangeImage" />
         </div>
+        <div class="pure-controls">
+          <label class="control-label" for="add-copyright">
+            <input type="checkbox" class="add-copyright" id="add-copyright" v-model="addCopyright" v-on:change="onChangeContent" /> コピーライトを付ける
+          </label>
+        </div>
       </div>
       <div class="pure-u-8-24">
         <p class="notice">動作確認済ブラウザ: Google Chrome, Firefox, Safari</p>
@@ -56,6 +64,7 @@
         <p class="notice">iPhone, Androidはこちら→
           <button id="download" v-on:click="doDownload">ダウンロード</button>
         </p>
+        <p class="notice">iPhoneはダウンロードリンクを開いた後ロングタップ(画像を長押し)してください</p>
         <p class="notice">推奨ハッシュタグ: </p>
         <p class="notice">#FFXIVCFGEN #FFXIVコンテンツ開放ジェネレーター</p>
       </div>
@@ -72,6 +81,7 @@
         data: {
           primaryText: "",
           secondaryText: "",
+          addCopyright: true,
           orig: null,
           canvas: null,
           context: null,
@@ -79,7 +89,6 @@
         mounted: (function() {
           this.canvas = document.querySelector("#preview");
           this.context = this.canvas.getContext("2d");
-          this.context.font = "bold 80px 'ヒラギノ明朝 ProN', 'Hiragino Mincho ProN', 'Sawarabi Mincho', 'Noto Serif CJK JP', 'MS PMincho', serif";
         }),
         methods: {
           onChangeImage: (function(e) {
@@ -128,36 +137,66 @@
           }),
           render: (function() {
             this.clear();
-            if(this.orig != null) {
-              this.renderImage();
-              this.renderPrimaryText();
-              this.renderSecondaryText();
+            if(this.orig == null) {
+              return false;
+            }
+            this.renderImage();
+            this.renderPrimaryText();
+            this.renderSecondaryText();
+            if(this.addCopyright) {
+              this.renderCopyright();
             }
           }),
           renderImage: (function() {
             this.context.drawImage(
-                this.orig,
-                0,
-                0,
-                this.orig.width,
-                this.orig.height,
-                0,
-                0,
-                this.canvas.width,
-                this.canvas.height
+              this.orig,
+              0,
+              0,
+              this.orig.width,
+              this.orig.height,
+              0,
+              0,
+              this.canvas.width,
+              this.canvas.height
             );
           }),
+          changeFontForDecoratedText: (function() {
+            this.context.font = "bold 80px 'ヒラギノ明朝 ProN', 'Hiragino Mincho ProN', 'Sawarabi Mincho', 'Noto Serif CJK JP', 'MS PMincho', serif";
+          }),
+          changeFontForCopyright: (function() {
+            this.context.font = "bold 20px 'ヒラギノ角ゴ Pro W3', 'HiraKakuPro-W3', 'Sawarabi Gothic', 'Meiryo', 'Meiryo UI', sans-serif";
+          }),
           renderPrimaryText: (function() {
+            this.changeFontForDecoratedText();
             var dx = (this.canvas.width / 2) - (this.context.measureText(this.primaryText).width / 2);
             var dy = this.canvas.height * 0.325;
-            this.renderText(this.primaryText, dx, dy);
+            this.renderDecoratedText(this.primaryText, dx, dy);
           }),
           renderSecondaryText: (function() {
+            this.changeFontForDecoratedText();
             var dx = (this.canvas.width / 2) - (this.context.measureText(this.secondaryText).width / 2);
             var dy = this.canvas.height * 0.325 + 90;
-            this.renderText(this.secondaryText, dx, dy);
+            this.renderDecoratedText(this.secondaryText, dx, dy);
           }),
-          renderText: (function(text, dx, dy) {
+          renderCopyright: (function() {
+            this.changeFontForCopyright();
+
+            var year = (new Date()).getFullYear();
+            var copyright = "Copyright (C) 2010 - " + year + " SQUARE ENIX CO., LTD. All Rights Reserved.";
+            var dx = 16;
+            var dy = this.canvas.height - 16;
+
+            this.context.shadowBlur = 2;
+            this.context.shadowColor = "#222222";
+            this.context.shadowOffsetX = 0;
+            this.context.shadowOffsetY = 0;
+            this.context.lineWidth = 2;
+            this.context.strokeStyle = "#222222";
+            this.context.strokeText(copyright, dx, dy);
+            this.context.fillStyle = "#ffffff";
+            this.context.fillText(copyright, dx, dy);
+          }),
+          renderDecoratedText: (function(text, dx, dy) {
             this.context.shadowBlur = 8;
             this.context.shadowColor = "#cb8a00";
             this.context.shadowOffsetX = 0;
