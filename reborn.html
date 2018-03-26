@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>FFXIV コンテンツ開放ジェネレーター</title>
+  <meta name="description" content="FFXIV コンテンツ開放風画像が作成できるジェネレーターです。Author: @mapoyon">
+  <link href="https://fonts.googleapis.com/earlyaccess/sawarabimincho.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/earlyaccess/sawarabigothic.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link href="https://fonts.googleapis.com/earlyaccess/notosansjapanese.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.min.js"></script>
+  <style type="text/css">
+    body {
+      color: #777;
+      line-height: 1.6;
+    }
+    #cf-title,
+    #cf-content,
+    #cf-notice {
+      display: none;
+    }
+    #svg-template__title,
+    #svg-template__notice {
+      display: block;
+    }
+    #vue-root {
+      margin: 10px;
+    }
+    .pure-form-aligned .pure-control-group label {
+      width: 6em;
+    }
+    .notice {
+      font-size: 12px;
+      margin: 4px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="vue-root">
+    <h2>FFXIV コンテンツ開放ジェネレーター</h2>
+    <div class="pure-g">
+      <div class="pure-form pure-form-aligned pure-u-12-24">
+        <div class="pure-control-group">
+          <label class="control-label" for="input-primary">コンテンツ名</label>
+          <input type="text" placeholder="コンテンツ開放" id="input-primary" class="pure-input-3-3" v-model="primaryText" v-on:keyup="onChangeContent" v-on:change="onChangeContent" />
+        </div>
+        <div class="pure-control-group">
+          <label class="control-label" for="input-secondary">コンテンツ名</label>
+          <input type="text" placeholder="天然要害 サスタシャ浸食洞" id="input-secondary" class="pure-input-3-3" v-model="secondaryText" v-on:keyup="onChangeContent" v-on:change="onChangeContent" />
+        </div>
+        <div class="pure-control-group">
+          <label class="control-label" for="select-image">画像を選択</label>
+          <input type="file" class="select-image" id="select-image" v-on:change="onChangeImage" />
+        </div>
+      </div>
+      <div class="pure-u-8-24">
+        <p class="notice">動作確認済ブラウザ: Google Chrome, Firefox, Safari</p>
+        <p class="notice">Author: <a href="https://twitter.com/mapoyon" target="_blank">@mapoyon</a></p>
+      </div>
+    </div>
+
+    <div class="pure-g">
+      <div class="pure-u-12-24">
+        <p class="notice">画像を右クリックで保存出来ます。</p>
+        <p class="notice">保存できない場合はこちら→
+          <button id="download" v-on:click="doDownload">ダウンロード</button>
+        </p>
+        <p class="notice">推奨ハッシュタグ: </p>
+        <p class="notice">#FFXIVCFGEN #FFXIVコンテンツ開放ジェネレーター</p>
+      </div>
+    </div>
+
+    <canvas id="preview" class="pure-u-24-24" width="1920" height="1080">
+    </canvas>
+  </div>
+
+  <script type="text/javascript">
+    (function() {
+      var vm = new Vue({
+        el: "#vue-root",
+        data: {
+          primaryText: "コンテンツ開放",
+          secondaryText: "天然要害 サスタシャ浸食洞",
+          orig: null,
+          canvas: null,
+          context: null,
+        },
+        mounted: (function() {
+          this.canvas = document.querySelector("#preview");
+          this.context = this.canvas.getContext("2d");
+          this.context.font = "bold 80px 'ヒラギノ角ゴ Pro W3', 'HiraKakuPro-W3', 'Sawarabi Mincho', 'Noto Serif CJK JP', 'Meiryo', 'Meiryo UI', sans-serif";
+        }),
+        methods: {
+          onChangeImage: (function(e) {
+            var file = e.target.files[0];
+
+            if(! file.type.match(/^image\/(png|jpeg|gif)$/)) {
+              return;
+            }
+
+            var image = new Image();
+            var reader = new FileReader();
+
+            reader.onload = (function(e) {
+              image.onload = (function() {
+                this.orig = image;
+                this.render();
+              }).bind(this);
+
+              image.src = e.target.result;
+            }).bind(this);
+
+            reader.readAsDataURL(file);
+          }),
+          onChangeContent: (function() {
+            this.render();
+          }),
+          doDownload: (function() {
+            var a = document.createElement("a");
+            var download = document.querySelector("#download");
+
+            download.setAttribute("disabled", "disabled");
+
+            a.setAttribute("href", document.querySelector("#preview").toDataURL("image/jpeg"));
+            a.setAttribute("download", "download.jpg");
+            a.click();
+
+            download.removeAttribute("disabled");
+          }),
+          clear: (function() {
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+          }),
+          render: (function() {
+            this.clear();
+            if(this.orig != null) {
+              this.renderImage();
+              this.renderPrimaryText();
+              this.renderSecondaryText();
+            }
+          }),
+          renderImage: (function() {
+            this.context.drawImage(
+                this.orig,
+                0,
+                0,
+                this.orig.width,
+                this.orig.height,
+                0,
+                0,
+                this.canvas.width,
+                this.canvas.height
+            );
+          }),
+          renderPrimaryText: (function() {
+            var dx = (this.canvas.width / 2) - (this.context.measureText(this.primaryText).width / 2);
+            var dy = this.canvas.height * 0.325;
+            this.renderText(this.primaryText, dx, dy);
+          }),
+          renderSecondaryText: (function() {
+            var dx = (this.canvas.width / 2) - (this.context.measureText(this.secondaryText).width / 2);
+            var dy = this.canvas.height * 0.325 + 90;
+            this.renderText(this.secondaryText, dx, dy);
+          }),
+          renderText: (function(text, dx, dy) {
+            this.context.shadowBlur = 8;
+            this.context.shadowColor = "#cb8a00";
+            this.context.shadowOffsetX = 0;
+            this.context.shadowOffsetY = 0;
+            this.context.lineWidth = 4;
+            this.context.strokeStyle = "#cb8a00";
+            this.context.strokeText(text, dx, dy);
+
+            this.context.shadowBlur = 2;
+            this.context.shadowColor = "#ffffff";
+            this.context.shadowOffsetX = 0;
+            this.context.shadowOffsetY = 0;
+            this.context.fillStyle = "rgba(253, 249, 230, 0.8)";
+            this.context.fillText(text, dx, dy);
+
+            this.context.shadowBlur = 12;
+            this.context.shadowColor = "#cb8a00";
+            this.context.shadowOffsetX = 0;
+            this.context.shadowOffsetY = 0;
+            this.context.fillStyle = "#f9f9f9";
+            this.context.fillText(text, dx, dy);
+
+            this.context.shadowBlur = 12;
+            this.context.shadowColor = "#cb8a00";
+            this.context.shadowOffsetX = -1;
+            this.context.shadowOffsetY = -1;
+            this.context.fillStyle = "#f9f9f9";
+            this.context.fillText(text, dx, dy);
+
+            this.context.shadowBlur = 12;
+            this.context.shadowColor = "#cb8a00";
+            this.context.shadowOffsetX = 1;
+            this.context.shadowOffsetY = 1;
+            this.context.fillStyle = "#f9f9f9";
+            this.context.fillText(text, dx, dy);
+          }),
+        },
+      });
+    })();
+  </script>
+
+<!--
+  <div id="test"></div>
+  <canvas id="canvas" width="200" height="250"></canvas>
+  <canvas id="canvas2" width="600" height="250"></canvas>
+  <script type="text/javascript">
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var canvas2 = document.getElementById('canvas2');
+    var ctx2 = canvas2.getContext('2d');
+
+    setTimeout(function() {
+      ctx.globalAlpha = 0.95;
+      ctx.font = "bold 64px 'Noto Sans Japanese'";
+      ctx.font = "bold 64px 'Noto Serif CJK JP'";
+      ctx.font = "bold 64px 'Sawarabi Mincho', 'Noto Serif CJK JP'";
+
+      //ctx.strokeStyle = "#000000";
+      //キャンバスサイズを変更すると各種設定がリセットされるので注意
+      canvas.width = ctx.measureText('コンテンツ開放').width + 50 + 8;
+      ctx.shadowBlur = 4;
+      ctx.shadowColor = "#cb8a00";
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#cb8a00";
+      ctx.font = "bold 64px 'Noto Serif CJK JP'";
+      ctx.font = "bold 64px 'Sawarabi Mincho', 'Noto Serif CJK JP'";
+      ctx.strokeText('コンテンツ開放', 50, 100);
+
+      ctx.shadowBlur = 2;
+      ctx.shadowColor = "#ffffff";
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.fillStyle = "rgba(253, 249, 230, 0.8)";
+      ctx.fillText('コンテンツ開放', 50, 100)
+
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = "#cb8a00";
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.fillStyle = "#f9f9f9";
+      ctx.fillText('コンテンツ開放', 50, 100);
+
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = "#cb8a00";
+      ctx.shadowOffsetX = -1;
+      ctx.shadowOffsetY = -1;
+      ctx.fillStyle = "#fdf9e6";
+      ctx.fillText('コンテンツ開放', 50, 100);
+
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = "#cb8a00";
+      ctx.shadowOffsetX = 1;
+      ctx.shadowOffsetY = 1;
+      ctx.fillStyle = "#fdf9e6";
+      ctx.fillStyle = "#f9f9f9";
+      ctx.fillText('コンテンツ開放', 50, 100);
+    }, 200);
+
+    /*
+    class Vec4 {
+      constructor(data) {
+        this.r = data[0];
+        this.g = data[1];
+        this.b = data[2];
+        this.a = data[3];
+      }
+    }
+
+    var orig = ctx.getImageData(0, 0, 500, 250);
+    var n = ctx2.createImageData(500, 250);
+
+    for(var i = 0; i < orig.data.length; i+=4) {
+
+      var p = i / 4;
+      var vec = new Vec4(orig.data.slice(i, i+4));
+      if(vec.a > 0) {
+        vec.r = 203;
+        vec.g = 132;
+        vec.b = 2;
+        vec.a = 255;
+        var r = Math.floor(p / 500);
+        var c = p % 500;
+        if(r - 1 > 0) {
+          // 上
+          n.data[((r - 1) * 500 + c) * 4] = vec.r;
+          n.data[((r - 1) * 500 + c) * 4 + 1] = vec.g;
+          n.data[((r - 1) * 500 + c) * 4 + 2] = vec.b;
+          n.data[((r - 1) * 500 + c) * 4 + 3] = vec.a;
+          // 左上
+          if(c - 1 > 0) {
+            n.data[((r - 1) * 500 + c - 1) * 4] = vec.r;
+            n.data[((r - 1) * 500 + c - 1) * 4 + 1] = vec.g;
+            n.data[((r - 1) * 500 + c - 1) * 4 + 2] = vec.b;
+            n.data[((r - 1) * 500 + c - 1) * 4 + 3] = vec.a;
+          }
+          // 右上
+          if(c + 1 < 250) {
+            n.data[((r - 1) * 500 + c + 1) * 4] = vec.r;
+            n.data[((r - 1) * 500 + c + 1) * 4 + 1] = vec.g;
+            n.data[((r - 1) * 500 + c + 1) * 4 + 2] = vec.b;
+            n.data[((r - 1) * 500 + c + 1) * 4 + 3] = vec.a;
+          }
+        }
+        if(r + 1 < 250) {
+          // 下
+          n.data[((r + 1) * 500 + c) * 4] = vec.r;
+          n.data[((r + 1) * 500 + c) * 4 + 1] = vec.g;
+          n.data[((r + 1) * 500 + c) * 4 + 2] = vec.b;
+          n.data[((r + 1) * 500 + c) * 4 + 3] = vec.a;
+          // 左下
+          if(c - 1 > 0) {
+            n.data[((r + 1) * 500 + c - 1) * 4] = vec.r;
+            n.data[((r + 1) * 500 + c - 1) * 4 + 1] = vec.g;
+            n.data[((r + 1) * 500 + c - 1) * 4 + 2] = vec.b;
+            n.data[((r + 1) * 500 + c - 1) * 4 + 3] = vec.a;
+          }
+          // 右下
+          if(c + 1 < 250) {
+            n.data[((r + 1) * 500 + c + 1) * 4] = vec.r;
+            n.data[((r + 1) * 500 + c + 1) * 4 + 1] = vec.g;
+            n.data[((r + 1) * 500 + c + 1) * 4 + 2] = vec.b;
+            n.data[((r + 1) * 500 + c + 1) * 4 + 3] = vec.a;
+          }
+        }
+        // 中央
+        n.data[(r * 500 + c) * 4] = vec.r;
+        n.data[(r * 500 + c) * 4 + 1] = vec.g;
+        n.data[(r * 500 + c) * 4 + 2] = vec.b;
+        n.data[(r * 500 + c) * 4 + 3] = vec.a;
+        // 左
+        if(c - 1 > 0) {
+          n.data[(r * 500 + c - 1) * 4] = vec.r;
+          n.data[(r * 500 + c - 1) * 4 + 1] = vec.g;
+          n.data[(r * 500 + c - 1) * 4 + 2] = vec.b;
+          n.data[(r * 500 + c - 1) * 4 + 3] = vec.a;
+        }
+        // 右
+        if(c + 1 < 250) {
+          n.data[(r * 500 + c + 1) * 4] = vec.r;
+          n.data[(r * 500 + c + 1) * 4 + 1] = vec.g;
+          n.data[(r * 500 + c + 1) * 4 + 2] = vec.b;
+          n.data[(r * 500 + c + 1) * 4 + 3] = vec.a;
+        }
+      }
+    }
+
+    for(var i = 0; i < orig.data.length; i+=4) {
+      var p = i / 4;
+      var r = Math.floor(p / 500);
+      var c = p % 500;
+      var vec = new Vec4(orig.data.slice(i, i+4));
+      if(vec.a > 10) {
+        vec.r = 255;
+        vec.g = 255;
+        vec.b = 255;
+        n.data[(r * 500 + c) * 4] = vec.r;
+        n.data[(r * 500 + c) * 4 + 1] = vec.g;
+        n.data[(r * 500 + c) * 4 + 2] = vec.b;
+        n.data[(r * 500 + c) * 4 + 3] += vec.a;
+      }
+    }
+
+    ctx2.putImageData(n, 0, 0);
+    */
+  </script>
+-->
+</body>
+</html>
