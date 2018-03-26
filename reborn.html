@@ -14,20 +14,11 @@
       color: #777;
       line-height: 1.6;
     }
-    #cf-title,
-    #cf-content,
-    #cf-notice {
-      display: none;
-    }
-    #svg-template__title,
-    #svg-template__notice {
-      display: block;
-    }
     #vue-root {
       margin: 10px;
     }
     .pure-form-aligned .pure-control-group label {
-      width: 6em;
+      width: 8em;
     }
     .notice {
       font-size: 12px;
@@ -41,12 +32,12 @@
     <div class="pure-g">
       <div class="pure-form pure-form-aligned pure-u-12-24">
         <div class="pure-control-group">
-          <label class="control-label" for="input-primary">コンテンツ名</label>
-          <input type="text" placeholder="コンテンツ開放" id="input-primary" class="pure-input-3-3" v-model="primaryText" v-on:keyup="onChangeContent" v-on:change="onChangeContent" />
+          <label class="control-label" for="input-primary">1行目のテキスト</label>
+          <input type="text" placeholder="例) コンテンツ開放" id="input-primary" class="pure-input-3-3" v-model="primaryText" v-on:keyup="onChangeContent" v-on:change="onChangeContent" />
         </div>
         <div class="pure-control-group">
-          <label class="control-label" for="input-secondary">コンテンツ名</label>
-          <input type="text" placeholder="天然要害 サスタシャ浸食洞" id="input-secondary" class="pure-input-3-3" v-model="secondaryText" v-on:keyup="onChangeContent" v-on:change="onChangeContent" />
+          <label class="control-label" for="input-secondary">2行目のテキスト</label>
+          <input type="text" placeholder="例) 天然要害 サスタシャ浸食洞" id="input-secondary" class="pure-input-3-3" v-model="secondaryText" v-on:keyup="onChangeContent" v-on:change="onChangeContent" />
         </div>
         <div class="pure-control-group">
           <label class="control-label" for="select-image">画像を選択</label>
@@ -62,7 +53,7 @@
     <div class="pure-g">
       <div class="pure-u-12-24">
         <p class="notice">画像を右クリックで保存出来ます。</p>
-        <p class="notice">保存できない場合はこちら→
+        <p class="notice">iPhone, Androidはこちら→
           <button id="download" v-on:click="doDownload">ダウンロード</button>
         </p>
         <p class="notice">推奨ハッシュタグ: </p>
@@ -79,8 +70,8 @@
       var vm = new Vue({
         el: "#vue-root",
         data: {
-          primaryText: "コンテンツ開放",
-          secondaryText: "天然要害 サスタシャ浸食洞",
+          primaryText: "",
+          secondaryText: "",
           orig: null,
           canvas: null,
           context: null,
@@ -116,11 +107,16 @@
             this.render();
           }),
           doDownload: (function() {
+            if(this.orig == null) {
+              return false;
+            }
+
             var a = document.createElement("a");
             var download = document.querySelector("#download");
 
             download.setAttribute("disabled", "disabled");
 
+            a.setAttribute("target", "_blank");
             a.setAttribute("href", document.querySelector("#preview").toDataURL("image/jpeg"));
             a.setAttribute("download", "download.jpg");
             a.click();
@@ -202,173 +198,5 @@
       });
     })();
   </script>
-
-<!--
-  <div id="test"></div>
-  <canvas id="canvas" width="200" height="250"></canvas>
-  <canvas id="canvas2" width="600" height="250"></canvas>
-  <script type="text/javascript">
-    var canvas = document.getElementById('canvas');
-    var ctx = canvas.getContext('2d');
-    var canvas2 = document.getElementById('canvas2');
-    var ctx2 = canvas2.getContext('2d');
-
-    setTimeout(function() {
-      ctx.globalAlpha = 0.95;
-      ctx.font = "bold 64px 'Noto Sans Japanese'";
-      ctx.font = "bold 64px 'Noto Serif CJK JP'";
-      ctx.font = "bold 64px 'Sawarabi Mincho', 'Noto Serif CJK JP'";
-
-      //ctx.strokeStyle = "#000000";
-      //キャンバスサイズを変更すると各種設定がリセットされるので注意
-      canvas.width = ctx.measureText('コンテンツ開放').width + 50 + 8;
-      ctx.shadowBlur = 4;
-      ctx.shadowColor = "#cb8a00";
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = "#cb8a00";
-      ctx.font = "bold 64px 'Noto Serif CJK JP'";
-      ctx.font = "bold 64px 'Sawarabi Mincho', 'Noto Serif CJK JP'";
-      ctx.strokeText('コンテンツ開放', 50, 100);
-
-      ctx.shadowBlur = 2;
-      ctx.shadowColor = "#ffffff";
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-      ctx.fillStyle = "rgba(253, 249, 230, 0.8)";
-      ctx.fillText('コンテンツ開放', 50, 100)
-
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = "#cb8a00";
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-      ctx.fillStyle = "#f9f9f9";
-      ctx.fillText('コンテンツ開放', 50, 100);
-
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = "#cb8a00";
-      ctx.shadowOffsetX = -1;
-      ctx.shadowOffsetY = -1;
-      ctx.fillStyle = "#fdf9e6";
-      ctx.fillText('コンテンツ開放', 50, 100);
-
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = "#cb8a00";
-      ctx.shadowOffsetX = 1;
-      ctx.shadowOffsetY = 1;
-      ctx.fillStyle = "#fdf9e6";
-      ctx.fillStyle = "#f9f9f9";
-      ctx.fillText('コンテンツ開放', 50, 100);
-    }, 200);
-
-    /*
-    class Vec4 {
-      constructor(data) {
-        this.r = data[0];
-        this.g = data[1];
-        this.b = data[2];
-        this.a = data[3];
-      }
-    }
-
-    var orig = ctx.getImageData(0, 0, 500, 250);
-    var n = ctx2.createImageData(500, 250);
-
-    for(var i = 0; i < orig.data.length; i+=4) {
-
-      var p = i / 4;
-      var vec = new Vec4(orig.data.slice(i, i+4));
-      if(vec.a > 0) {
-        vec.r = 203;
-        vec.g = 132;
-        vec.b = 2;
-        vec.a = 255;
-        var r = Math.floor(p / 500);
-        var c = p % 500;
-        if(r - 1 > 0) {
-          // 上
-          n.data[((r - 1) * 500 + c) * 4] = vec.r;
-          n.data[((r - 1) * 500 + c) * 4 + 1] = vec.g;
-          n.data[((r - 1) * 500 + c) * 4 + 2] = vec.b;
-          n.data[((r - 1) * 500 + c) * 4 + 3] = vec.a;
-          // 左上
-          if(c - 1 > 0) {
-            n.data[((r - 1) * 500 + c - 1) * 4] = vec.r;
-            n.data[((r - 1) * 500 + c - 1) * 4 + 1] = vec.g;
-            n.data[((r - 1) * 500 + c - 1) * 4 + 2] = vec.b;
-            n.data[((r - 1) * 500 + c - 1) * 4 + 3] = vec.a;
-          }
-          // 右上
-          if(c + 1 < 250) {
-            n.data[((r - 1) * 500 + c + 1) * 4] = vec.r;
-            n.data[((r - 1) * 500 + c + 1) * 4 + 1] = vec.g;
-            n.data[((r - 1) * 500 + c + 1) * 4 + 2] = vec.b;
-            n.data[((r - 1) * 500 + c + 1) * 4 + 3] = vec.a;
-          }
-        }
-        if(r + 1 < 250) {
-          // 下
-          n.data[((r + 1) * 500 + c) * 4] = vec.r;
-          n.data[((r + 1) * 500 + c) * 4 + 1] = vec.g;
-          n.data[((r + 1) * 500 + c) * 4 + 2] = vec.b;
-          n.data[((r + 1) * 500 + c) * 4 + 3] = vec.a;
-          // 左下
-          if(c - 1 > 0) {
-            n.data[((r + 1) * 500 + c - 1) * 4] = vec.r;
-            n.data[((r + 1) * 500 + c - 1) * 4 + 1] = vec.g;
-            n.data[((r + 1) * 500 + c - 1) * 4 + 2] = vec.b;
-            n.data[((r + 1) * 500 + c - 1) * 4 + 3] = vec.a;
-          }
-          // 右下
-          if(c + 1 < 250) {
-            n.data[((r + 1) * 500 + c + 1) * 4] = vec.r;
-            n.data[((r + 1) * 500 + c + 1) * 4 + 1] = vec.g;
-            n.data[((r + 1) * 500 + c + 1) * 4 + 2] = vec.b;
-            n.data[((r + 1) * 500 + c + 1) * 4 + 3] = vec.a;
-          }
-        }
-        // 中央
-        n.data[(r * 500 + c) * 4] = vec.r;
-        n.data[(r * 500 + c) * 4 + 1] = vec.g;
-        n.data[(r * 500 + c) * 4 + 2] = vec.b;
-        n.data[(r * 500 + c) * 4 + 3] = vec.a;
-        // 左
-        if(c - 1 > 0) {
-          n.data[(r * 500 + c - 1) * 4] = vec.r;
-          n.data[(r * 500 + c - 1) * 4 + 1] = vec.g;
-          n.data[(r * 500 + c - 1) * 4 + 2] = vec.b;
-          n.data[(r * 500 + c - 1) * 4 + 3] = vec.a;
-        }
-        // 右
-        if(c + 1 < 250) {
-          n.data[(r * 500 + c + 1) * 4] = vec.r;
-          n.data[(r * 500 + c + 1) * 4 + 1] = vec.g;
-          n.data[(r * 500 + c + 1) * 4 + 2] = vec.b;
-          n.data[(r * 500 + c + 1) * 4 + 3] = vec.a;
-        }
-      }
-    }
-
-    for(var i = 0; i < orig.data.length; i+=4) {
-      var p = i / 4;
-      var r = Math.floor(p / 500);
-      var c = p % 500;
-      var vec = new Vec4(orig.data.slice(i, i+4));
-      if(vec.a > 10) {
-        vec.r = 255;
-        vec.g = 255;
-        vec.b = 255;
-        n.data[(r * 500 + c) * 4] = vec.r;
-        n.data[(r * 500 + c) * 4 + 1] = vec.g;
-        n.data[(r * 500 + c) * 4 + 2] = vec.b;
-        n.data[(r * 500 + c) * 4 + 3] += vec.a;
-      }
-    }
-
-    ctx2.putImageData(n, 0, 0);
-    */
-  </script>
--->
 </body>
 </html>
