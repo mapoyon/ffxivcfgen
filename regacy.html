@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>FFXIV コンテンツ開放ジェネレーター</title>
+  <meta name="description" content="FFXIV コンテンツ開放風画像が作成できるジェネレーターです。Author: @mapoyon">
+  <link href="https://fonts.googleapis.com/earlyaccess/sawarabimincho.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/earlyaccess/sawarabigothic.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
+  <style type="text/css">
+    body {
+      color: #777;
+      line-height: 1.6;
+    }
+    #cf-title,
+    #cf-content,
+    #cf-notice {
+      display: none;
+    }
+    #svg-template__title,
+    #svg-template__notice {
+      display: none;
+    }
+    #vue-root {
+      margin: 10px;
+    }
+    .pure-form-aligned .pure-control-group label {
+      width: 6em;
+    }
+    .notice {
+      font-size: 12px;
+      margin: 4px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="vue-root">
+    <h2>FFXIV コンテンツ開放ジェネレーター</h2>
+    <div class="pure-g">
+      <div class="pure-form pure-form-aligned pure-u-12-24">
+        <div class="pure-control-group">
+          <label class="control-label" for="input-content">コンテンツ名</label>
+          <input type="text" placeholder="コンテンツ名を入力" id="input-content" class="pure-input-3-3" v-model="content" v-on:keyup="onChangeContent" v-on:change="onChangeContent" />
+        </div>
+        <div class="pure-control-group">
+          <label class="control-label" for="select-image">画像</label>
+          <input type="file" class="select-image" v-on:change="onChangeImage" />
+        </div>
+      </div>
+      <div class="pure-u-8-24">
+        <p class="notice">動作確認済ブラウザ: Google Chrome, Firefox, Safari</p>
+        <p class="notice">Author: <a href="https://twitter.com/mapoyon" target="_blank">@mapoyon</a></p>
+      </div>
+    </div>
+
+    <div class="pure-g">
+      <div class="pure-u-12-24">
+        <p class="notice">画像を右クリックで保存出来ます。</p>
+        <p class="notice" v-if="canLinkDownload">保存できない場合はこちら→
+          <button id="download" v-on:click="doDownload">ダウンロード</button>
+        </p>
+        <p class="notice">推奨ハッシュタグ: </p>
+        <p class="notice">#FFXIVCFGEN #FFXIVコンテンツ開放ジェネレーター</p>
+      </div>
+    </div>
+
+    <canvas id="preview" class="pure-u-24-24" width="1920" height="1080">
+    </canvas>
+
+    <div id="cf-title">
+      <div is="cf-title" v-bind:text="'コンテンツ開放'"></div>
+    </div>
+    <div id="cf-content">
+      <div is="cf-title" v-bind:text="content"></div>
+    </div>
+    <div id="cf-notice">
+      <div is="cf-notice" v-bind:text="'新しいコンテンツがコンテンツファインダーに登録されました。'"></div>
+    </div>
+  </div>
+
+  <div id="svg-template__title">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="90px">
+      <foreignObject width="100%" height="100%">
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+          font-size: 82px;
+          font-weight: 600;
+          font-family: 'ヒラギノ明朝 ProN', 'Hiragino Mincho ProN', 'Sawarabi Mincho', 'MS PMincho', serif;">
+          <p style="
+            color: #f9960c;
+            color: #fdf9e6;
+            width: 100%;
+            height: 90px;
+            line-height: 90px;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            filter: drop-shadow(0px 0px 1px #cb8402) drop-shadow(-1px -1px 1px #cb8402) drop-shadow(1px 1px 1px #cb8402);
+            text-shadow: 0px 0px 4px #ffffff, 0px 0px 2px #cb8402, 0px 0px 8px #cb8402;">
+            {{ text }}
+          </p>
+        </div>
+      </foreignObject>
+    </svg>
+  </div>
+
+  <div id="svg-template__notice">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="52px">
+      <foreignObject width="100%" height="100%">
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+          font-size: 20px;
+          font-weight: 300;
+          font-family: 'ヒラギノ角ゴ Pro W3', 'HiraKakuPro-W3', 'Sawarabi Gothic', 'Meiryo', 'Meiryo UI', sans-serif;
+          text-align: center;">
+          <div style="
+            background-color: rgba(16, 16, 16, 0.5);
+            filter: drop-shadow(0px 0px 2px rgba(32, 32, 32, 0.5)) drop-shadow(-1px -1px 2px rgba(32, 32, 32, 0.5)) drop-shadow(1px 1px 2px rgba(32, 32, 32, 0.5));
+            border-radius: 20px;
+            display: inline-block;
+            height: 40px;
+            line-height: 40px;
+            margin: 4px 32px;
+            padding: 0 8px;
+            ">
+            <p style="
+              color: #fdf9e6;
+              width: 100%;
+              display: block;
+              text-align: center;
+              margin: 0 8px;
+              padding: 0;
+              filter: drop-shadow(-1px -1px 1px #cb8402) drop-shadow(1px 1px 1px #cb8402);
+              text-shadow: 0px 0px 2px #ffffff, 0px 0px 4px #cb8402;">
+              {{ text }}
+            </p>
+          </div>
+        </div>
+      </foreignObject>
+    </svg>
+  </div>
+
+  <script type="text/javascript">
+    (function() {
+      Vue.component("cf-title", {
+        template : "#svg-template__title",
+        props: ["text"],
+      });
+      Vue.component("cf-notice", {
+        template : "#svg-template__notice",
+        props: ["text"],
+      });
+
+      var vm = new Vue({
+        el: "#vue-root",
+        data: {
+          content: "",
+          orig: null,
+          canvas: null,
+          context: null,
+        },
+        mounted: (function() {
+          this.canvas = document.querySelector("#preview");
+          this.context = this.canvas.getContext("2d");
+        }),
+        computed: {
+          canLinkDownload: (function() {
+            var userAgent = window.navigator.userAgent.toLowerCase();
+            if(userAgent.indexOf("android") != -1) {
+              return true;
+            } else {
+              return false;
+            }
+          }),
+        },
+        methods: {
+          onChangeImage: (function(e) {
+            var file = e.target.files[0];
+
+            if(! file.type.match(/^image\/(png|jpeg|gif)$/)) {
+              return;
+            }
+
+            var image = new Image();
+            var reader = new FileReader();
+
+            reader.onload = (function(e) {
+              image.onload = (function() {
+                this.orig = image;
+                this.render();
+              }).bind(this);
+
+              image.src = e.target.result;
+            }).bind(this);
+
+            reader.readAsDataURL(file);
+          }),
+          onChangeContent: (function() {
+            this.render();
+          }),
+          doDownload: (function() {
+            var a = document.createElement("a");
+            var download = document.querySelector("#download");
+
+            download.setAttribute("disabled", "disabled");
+
+            a.setAttribute("href", document.querySelector("#preview").toDataURL("image/jpeg"));
+            a.setAttribute("download", "download.jpg");
+            a.click();
+
+            download.removeAttribute("disabled");
+          }),
+          clear: (function() {
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+          }),
+          render: (function() {
+            this.clear();
+            if(this.orig != null) {
+              this.renderImage();
+              this.renderTitle();
+              this.renderContent();
+              this.renderNotice();
+            }
+          }),
+          renderImage: (function() {
+            this.context.drawImage(
+              this.orig,
+              0,
+              0,
+              this.orig.width,
+              this.orig.height,
+              0,
+              0,
+              this.canvas.width,
+              this.canvas.height
+            );
+          }),
+          renderTitle: (function() {
+            var data = document.querySelector("#cf-title").innerHTML;
+            this.renderSvg(data, 0, this.canvas.height * 0.225);
+          }),
+          renderContent: (function() {
+            var data = document.querySelector("#cf-content").innerHTML;
+            this.renderSvg(data, 0, this.canvas.height * 0.225 + 90);
+          }),
+          renderNotice: (function() {
+            var data = document.querySelector("#cf-notice").innerHTML;
+            this.renderSvg(data, 0, this.canvas.height * 0.6);
+          }),
+          renderSvg: (function(data, dx, dy) {
+            var image = new Image();
+            var svg = new Blob([data], {type: "image/svg+xml;charset=utf-8"});
+            var url = "data:image/svg+xml;charset=utf-8;base64," + btoa(unescape(encodeURIComponent(data)));
+
+            image.addEventListener("load", (function() {
+              this.context.drawImage(image, dx, dy);
+              URL.revokeObjectURL(url);
+            }).bind(this), false);
+
+            image.src = url;
+          }),
+        },
+      });
+    })();
+  </script>
+</body>
+</html>
